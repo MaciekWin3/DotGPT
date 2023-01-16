@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGPT", "DotGPT\DotGPT.csproj", "{8D9774DE-BBC9-4676-AD2D-BB62A9D9DD88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGPT", "src\DotGPT\DotGPT.csproj", "{8D9774DE-BBC9-4676-AD2D-BB62A9D9DD88}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{061C1C34-E098-4B72-9C1C-0F899CC89236}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{ADD74E2C-9FB5-41DD-9C9D-07DE091AE84B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGPT.Unit.Tests", "DotGPT.Unit.Tests\DotGPT.Unit.Tests.csproj", "{98595362-EA37-435E-B147-8500A9D1BE78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGPT.Unit.Tests", "tests\DotGPT.Unit.Tests\DotGPT.Unit.Tests.csproj", "{98595362-EA37-435E-B147-8500A9D1BE78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
