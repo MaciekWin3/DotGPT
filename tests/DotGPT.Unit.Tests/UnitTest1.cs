@@ -1,3 +1,5 @@
+using NUnit.Framework;
+
 namespace DotGPT.Unit.Tests
 {
     public class Tests
