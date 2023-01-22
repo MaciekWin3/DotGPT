@@ -16,6 +16,7 @@ var host = Host.CreateDefaultBuilder()
     .ConfigureServices((context, services) =>
     {
         services.AddTransient<ChatGpt3Client>();
+        services.AddTransient<Cli>();
 
         services.AddHttpClient("chatgptapi", client =>
         {
@@ -35,5 +36,5 @@ var host = Host.CreateDefaultBuilder()
 #endif
     }).Build();
 
-var svc = ActivatorUtilities.CreateInstance<ChatGpt3Client>(host.Services);
+var svc = ActivatorUtilities.CreateInstance<Cli>(host.Services);
 await svc.Run(args);

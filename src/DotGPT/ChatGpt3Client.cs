@@ -13,34 +13,6 @@ namespace DotGPT
             this.httpClientFactory = httpClientFactory;
         }
 
-        public async Task Run(string[] arguments)
-        {
-            string prompt = string.Empty;
-            if (arguments.Length == 0)
-            {
-                await RunInteractiveMode();
-            }
-            if (arguments.Length > 0)
-            {
-                prompt = arguments.First();
-            }
-            Console.WriteLine(await GetResponseAsync(prompt));
-        }
-
-        public async Task RunInteractiveMode()
-        {
-            while (true)
-            {
-                Console.Write("Prompt: ");
-                string prompt = Console.ReadLine() ?? string.Empty;
-                if (string.IsNullOrEmpty(prompt))
-                {
-                    Console.WriteLine("Error!");
-                }
-                Console.WriteLine(await GetResponseAsync(prompt));
-            }
-        }
-
         public async Task<string> GetResponseAsync(string prompt)
         {
             var httpClient = httpClientFactory.CreateClient("chatgptapi");
@@ -55,11 +27,19 @@ namespace DotGPT
             }
             string jsonString = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<ChatGptResponse>(jsonString);
-            if (result is null)
+            if (result is not null)
             {
-                Console.WriteLine("xd");
+                var answer = result.Choices?.FirstOrDefault()?.Text;
+                if (answer is not null)
+                {
+                    return answer;
+                }
+                else
+                {
+                    return string.Empty;
+                }
             }
-            return result.Choices.FirstOrDefault().Text;
+            return string.Empty;
         }
     }
 }
