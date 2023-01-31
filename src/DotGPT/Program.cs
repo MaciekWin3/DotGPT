@@ -24,16 +24,14 @@ var host = Host.CreateDefaultBuilder()
             client.DefaultRequestHeaders.Add("authorization", $"Bearer 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");
         });
 
-#if DEBUG
         services.AddLogging(builder =>
         {
             builder
                 .AddFilter("Microsoft", LogLevel.Warning)
-                .AddFilter("System", LogLevel.Debug)
+                .AddFilter("System", LogLevel.Warning)
                 .AddFilter("NToastNotify", LogLevel.Warning)
                 .AddConsole();
         });
-#endif
     }).Build();
 
 var svc = ActivatorUtilities.CreateInstance<Cli>(host.Services);

@@ -6,8 +6,10 @@ namespace DotGPT.Models.Requests
     {
         [JsonPropertyName("model")]
         public string Model { get; set; } = "text-davinci-003";
+
         [JsonPropertyName("prompt")]
         public string Prompt { get; set; }
+
         [JsonPropertyName("temperature")]
         public double Temperature { get; set; } = 0.7;
 

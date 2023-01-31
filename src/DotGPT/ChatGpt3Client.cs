@@ -13,12 +13,9 @@ namespace DotGPT
             this.httpClientFactory = httpClientFactory;
         }
 
-        public async Task<string> GetResponseAsync(string prompt)
+        public async Task<string> GetResponseAsync(ChatGptRequest request)
         {
             var httpClient = httpClientFactory.CreateClient("chatgptapi");
-            var request = new ChatGptRequest(prompt);
-            //var x = JsonSerializer.Serialize(request);
-            //var response = await httpClient.PostAsJsonAsync("v1/completions", x);
             var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
             var response = await httpClient.PostAsync("v1/completions", content);
             if (!response.IsSuccessStatusCode)
