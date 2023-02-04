@@ -1,5 +1,6 @@
 ﻿using DotGPT.Models.Requests;
 using Spectre.Console;
+using System.Security.Cryptography;
 
 namespace DotGPT
 {
@@ -13,39 +14,86 @@ namespace DotGPT
 
         public async Task Run(string[] arguments)
         {
-            string prompt = string.Empty;
             if (arguments.Length == 0)
             {
                 await RunInteractiveMode();
             }
+
             if (arguments.Length == 1 && arguments.First() == "--advanced")
             {
-                prompt = arguments.First();
                 var request = BuildChatGptRequestWithUserParameters();
                 var response = await GetResponseAsync(request);
                 AnsiConsole.MarkupLine($"[darkslategray1]{response}[/]");
+            }
 
-            }
-            else if (arguments.Length == 1)
+            else if (arguments.Length == 1 && (arguments.First() is "--hel" or "-h"))
             {
-                Console.Write(arguments[0]);
+                DisplayHelp();
+                return;
             }
-            //AnsiConsole.WriteLine(await chatGpt3Client.GetResponseAsync(BuildChatGptRequestWithDefaultValues(prompt)));
+            AnsiConsole.MarkupLine("[red]Wrong command! Try again with diffrent command or use --help argument![/]");
+        }
+
+        public static string GetOpenAiToken()
+        {
+            try
+            {
+                byte[] encryptedSecretFromFile = File.ReadAllBytes("dotgptsecrets.bin");
+                string decryptedSecret = System.Text.Encoding.Unicode
+                    .GetString(ProtectedData.Unprotect(encryptedSecretFromFile, null, DataProtectionScope.LocalMachine));
+                if (string.IsNullOrEmpty(decryptedSecret))
+                {
+                    return string.Empty;
+                }
+                return decryptedSecret;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        public static string SetOpenAiToken()
+        {
+            Console.Write("Place your api token here:");
+            string secret = Console.ReadLine() ?? string.Empty;
+            if (string.IsNullOrEmpty(secret))
+            {
+                Console.WriteLine("Error");
+                return string.Empty;
+            }
+            byte[] encryptedSecret = ProtectedData
+                .Protect(System.Text.Encoding.Unicode.GetBytes(secret), null, DataProtectionScope.LocalMachine);
+            File.WriteAllBytes("dotgptsecrets.bin", encryptedSecret);
+            return secret;
+        }
+
+        public void DisplayHelp()
+        {
+            Console.WriteLine("Usage: dotgpt [OPTIONS] INPUT");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine("-h, --help       Display this message");
+            Console.WriteLine("-a, --advanced   Run advanced mode");
         }
 
         public async Task RunInteractiveMode()
         {
             while (true)
             {
-                string prompt = AnsiConsole.Ask<string>("[seagreen2]Prompt:[/] ");
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.Write("Prompt: ");
+                Console.ResetColor();
+                string prompt = Console.ReadLine() ?? string.Empty;
                 if (string.IsNullOrEmpty(prompt))
                 {
-                    AnsiConsole.WriteLine("[red] Error! Please write something to text prompt before submiting!");
+                    AnsiConsole.WriteLine("[red] Error! Please write something to text prompt before submiting![/]");
                     continue;
                 }
                 var request = new ChatGptRequest(prompt);
                 var response = await GetResponseAsync(request);
 
+                // It throwed error
                 AnsiConsole.MarkupLine($"[darkslategray1]{response}[/]");
             }
         }

@@ -6,9 +6,11 @@ using Microsoft.Extensions.Logging;
 
 var builder = new ConfigurationBuilder();
 
-builder.SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-    .AddEnvironmentVariables();
+string token = Cli.GetOpenAiToken();
+if (string.IsNullOrEmpty(token))
+{
+    token = Cli.SetOpenAiToken();
+}
 
 var configuration = builder.Build();
 
@@ -21,7 +23,7 @@ var host = Host.CreateDefaultBuilder()
         services.AddHttpClient("chatgptapi", client =>
         {
             client.BaseAddress = new Uri("https://api.openai.com/");
-            client.DefaultRequestHeaders.Add("authorization", $"Bearer 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");
+            client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
         });
 
         services.AddLogging(builder =>
