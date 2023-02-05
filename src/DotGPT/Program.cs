@@ -3,38 +3,42 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 
 var builder = new ConfigurationBuilder();
 
-string token = Cli.GetOpenAiToken();
-if (string.IsNullOrEmpty(token))
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    token = Cli.SetOpenAiToken();
-}
-
-var configuration = builder.Build();
-
-var host = Host.CreateDefaultBuilder()
-    .ConfigureServices((context, services) =>
+    string token = Cli.GetOpenAiToken();
+    if (string.IsNullOrEmpty(token))
     {
-        services.AddTransient<ChatGpt3Client>();
-        services.AddTransient<Cli>();
+        token = Cli.SetOpenAiToken();
+    }
 
-        services.AddHttpClient("chatgptapi", client =>
+    var configuration = builder.Build();
+
+    var host = Host.CreateDefaultBuilder()
+        .ConfigureServices((context, services) =>
         {
-            client.BaseAddress = new Uri("https://api.openai.com/");
-            client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-        });
+            services.AddTransient<ChatGpt3Client>();
+            services.AddTransient<Cli>();
 
-        services.AddLogging(builder =>
-        {
-            builder
-                .AddFilter("Microsoft", LogLevel.Warning)
-                .AddFilter("System", LogLevel.Warning)
-                .AddFilter("NToastNotify", LogLevel.Warning)
-                .AddConsole();
-        });
-    }).Build();
+            services.AddHttpClient("chatgptapi", client =>
+            {
+                client.BaseAddress = new Uri("https://api.openai.com/");
+                client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
+            });
 
-var svc = ActivatorUtilities.CreateInstance<Cli>(host.Services);
-await svc.Run(args);
+            services.AddLogging(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("NToastNotify", LogLevel.Warning)
+                    .AddConsole();
+            });
+        }).Build();
+
+    var svc = ActivatorUtilities.CreateInstance<Cli>(host.Services);
+    await svc.Run(args);
+}

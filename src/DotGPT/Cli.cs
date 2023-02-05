@@ -1,5 +1,6 @@
 ﻿using DotGPT.Models.Requests;
 using Spectre.Console;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace DotGPT
@@ -18,24 +19,29 @@ namespace DotGPT
             {
                 await RunInteractiveMode();
             }
-
-            if (arguments.Length == 1 && arguments.First() == "--advanced")
+            else if (arguments.Length == 1 && arguments.First() is "--advanced" or "-a")
             {
                 var request = BuildChatGptRequestWithUserParameters();
                 var response = await GetResponseAsync(request);
                 AnsiConsole.MarkupLine($"[darkslategray1]{response}[/]");
             }
-
             else if (arguments.Length == 1 && (arguments.First() is "--hel" or "-h"))
             {
                 DisplayHelp();
                 return;
             }
-            AnsiConsole.MarkupLine("[red]Wrong command! Try again with diffrent command or use --help argument![/]");
+            else
+            {
+                AnsiConsole.MarkupLine("[red]Wrong command! Try again with diffrent command or use --help argument![/]");
+            }
         }
 
         public static string GetOpenAiToken()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                throw new PlatformNotSupportedException("Currently we are only supporting Windows. Feel free to contribute to our project!");
+            }
             try
             {
                 byte[] encryptedSecretFromFile = File.ReadAllBytes("dotgptsecrets.bin");
@@ -55,6 +61,10 @@ namespace DotGPT
 
         public static string SetOpenAiToken()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                throw new PlatformNotSupportedException("Currently we are only supporting Windows. Feel free to contribute to our project!");
+            }
             Console.Write("Place your api token here:");
             string secret = Console.ReadLine() ?? string.Empty;
             if (string.IsNullOrEmpty(secret))
@@ -87,20 +97,20 @@ namespace DotGPT
                 string prompt = Console.ReadLine() ?? string.Empty;
                 if (string.IsNullOrEmpty(prompt))
                 {
-                    AnsiConsole.WriteLine("[red] Error! Please write something to text prompt before submiting![/]");
+                    PrintColoredTextToConsole("Error! Please write something to text prompt before submiting!", ConsoleColor.Red);
                     continue;
                 }
                 var request = new ChatGptRequest(prompt);
                 var response = await GetResponseAsync(request);
-
-                // It throwed error
-                AnsiConsole.MarkupLine($"[darkslategray1]{response}[/]");
+                PrintColoredTextToConsole(response, ConsoleColor.Gray);
             }
         }
 
-        public async Task PrintAnswerToConsole()
+        public void PrintColoredTextToConsole(string text, ConsoleColor color)
         {
-
+            Console.ForegroundColor = color;
+            Console.WriteLine(text);
+            Console.ResetColor();
         }
 
         public async Task<string> GetResponseAsync(ChatGptRequest request)
@@ -135,28 +145,16 @@ namespace DotGPT
                     .Title("[seagreen2]Model[/]")
                     .AddChoices(models));
             string prompt = AnsiConsole.Ask<string>("[seagreen2]Prompt:[/] ");
-
-            double temperature = AnsiConsole.Prompt(
-                new TextPrompt<double>("Temperature:")
-                    .PromptStyle("seagreen2")
-                    .ValidationErrorMessage("[red]Temperature should be value between 0.0 and 1.0[/]")
-                    .Validate(t =>
-                    {
-                        return t switch
-                        {
-                            < 0 => ValidationResult.Error("[red]Temperature value is too low[/]"),
-                            > 1 => ValidationResult.Error("[red]Temperature value is too high[/]"),
-                            _ => ValidationResult.Success()
-                        };
-                    }));
-
-            int maxTokens = AnsiConsole.Prompt(new TextPrompt<int>("[seagreen2]Prompt:[/] "));
-            int topP = AnsiConsole.Prompt(new TextPrompt<int>("[seagreen2]Prompt:[/] "));
-            int frequency = AnsiConsole.Prompt(new TextPrompt<int>("[seagreen2]Prompt:[/] "));
-            int presence = AnsiConsole.Prompt(new TextPrompt<int>("[seagreen2]Prompt:[/] "));
+            double temperature = AnsiConsole.Prompt(new TextPrompt<double>("[seagreen2]Temperature:[/] "));
+            int maxTokens = AnsiConsole.Prompt(new TextPrompt<int>("[seagreen2]Max tokens:[/] "));
+            int topP = AnsiConsole.Prompt(new TextPrompt<int>("[seagreen2]Top P:[/] "));
+            int frequency = AnsiConsole.Prompt(new TextPrompt<int>("[seagreen2]Frequency:[/] "));
+            int presence = AnsiConsole.Prompt(new TextPrompt<int>("[seagreen2]Presence:[/] "));
 
             return new ChatGptRequest(model, prompt, temperature, maxTokens, topP, frequency, presence);
         }
+
+
 
         public ChatGptRequest BuildChatGptRequestWithDefaultValues(string prompt)
         {
