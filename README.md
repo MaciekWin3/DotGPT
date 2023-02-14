@@ -1,6 +1,7 @@
 # DotGPT 🤖
 
 Terminal .NET application that interacts with ChatGPT.
+
 ![](./docs/usage.gif)
 
 ## About 🧾
